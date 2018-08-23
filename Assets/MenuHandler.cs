@@ -7,11 +7,32 @@ public class MenuHandler : MonoBehaviour {
     public TMPro.TextMeshProUGUI tooltip;
     private float tooltipTime;
 
+    public Animator menuAnimator, difficultyAnimator, popupAnimator;
+    private bool difOpen = false;
+    private bool menuOpen = true;
+
     void Start () {
-		
-	}
-	
-	void Update () {
+        Time.timeScale = 0;
+    }
+    
+    IEnumerator DisplayPopup(float time, string content)
+    {
+        popupAnimator.GetComponent<TMPro.TextMeshProUGUI>().text = content;
+
+        popupAnimator.gameObject.SetActive(true);
+
+        popupAnimator.Play("Open");
+
+        yield return new WaitForSeconds(time);
+
+        popupAnimator.Play("Close");
+        yield return new WaitForSeconds(0.2f);
+
+        popupAnimator.GetComponent<TMPro.TextMeshProUGUI>().text = "";
+        popupAnimator.gameObject.SetActive(false);
+    }
+
+    void Update () {
 
         Color c = tooltip.color;
 
@@ -25,8 +46,6 @@ public class MenuHandler : MonoBehaviour {
             c.a = Mathf.Lerp(c.a, 0, Time.deltaTime * 12);
         }
         tooltip.color = c;
-
-
     }
 
     public void ShowTooltip(float time, string content)
@@ -34,5 +53,48 @@ public class MenuHandler : MonoBehaviour {
         tooltipTime = time;
 
         tooltip.text = content;
+    }
+
+    public void ToggleDifficulty()
+    {
+        if (difOpen)
+        {
+            difficultyAnimator.Play("Close");
+        }
+        else
+        {
+            difficultyAnimator.Play("Open");
+        }
+
+        difOpen = !difOpen;
+    }
+
+    public void ToggleMenu()
+    {
+        if (menuOpen)
+        {
+            if (difOpen)
+            {
+                ToggleDifficulty();
+            }
+
+            Time.timeScale = 1;
+
+            menuAnimator.Play("Close");
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.Locked;
+
+            StartCoroutine(DisplayPopup(3, "CLEAN UP SPY IN GARDEROBE"));
+        }
+        else
+        {
+            Time.timeScale = 0;
+
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            menuAnimator.Play("Open");
+        }
+
+        menuOpen = !menuOpen;
     }
 }

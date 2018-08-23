@@ -9,13 +9,19 @@ public class GuestAI : MonoBehaviour {
     private Rigidbody rb;
     public float minDelay, maxDelay;
 
-    public float radius;
+    new AudioSource audio;
 
+    public float radius;
+    public float collideForce = 4;
     bool inAir = false;
+
+    public AudioClip[] collideClips;
 
 	void Start () {
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
+        audio = GetComponent<AudioSource>();
+
         FindNewPath();
 	}
 	
@@ -36,19 +42,20 @@ public class GuestAI : MonoBehaviour {
         Gizmos.DrawSphere(transform.position, radius);
     }
 
-    public void LaunchGuest()
+    public void LaunchGuest(Vector3 force)
     {
         if (!inAir)
         {
             CancelInvoke();
 
             inAir = true;
-
             agent.enabled = false;
 
             StartCoroutine(DelayedEnableGuest(4f));
         }
 
+        rb.isKinematic = false;
+        rb.AddForce(force, ForceMode.Impulse);
     }
 
     IEnumerator DelayedEnableGuest(float time)
@@ -69,9 +76,42 @@ public class GuestAI : MonoBehaviour {
             yield return new WaitForEndOfFrame();
         }
 
+        rb.isKinematic = true;
         inAir = false;
         agent.enabled = true;
 
         FindNewPath();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        switch (collision.transform.tag)
+        {
+            case "Player":
+
+                audio.PlayOneShot(collideClips[Random.Range(0, collideClips.Length)]);
+
+                StartCoroutine(PuntPlayer(collision.gameObject));
+
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    IEnumerator PuntPlayer(GameObject player)
+    {
+        Vector3 dir = (transform.position - player.transform.position).normalized;
+        dir = Vector3.ProjectOnPlane(dir, Vector3.up);
+
+        float time = 0;
+        while (time < 0.1f)
+        {
+            player.transform.Translate(dir * Time.deltaTime * 2);
+            time += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+
     }
 }

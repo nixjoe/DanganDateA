@@ -16,16 +16,22 @@ public class Player : MonoBehaviour {
 
 	void Start () {
         camera = Camera.main;
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+
 
         hand = animator.transform.GetChild(0);
+
+        if (hand.childCount > 0)
+        {
+            equippedItem = hand.GetChild(0).gameObject;
+        }
 	}
 
 	void Update () {
 
         RaycastHit hit;
-        bool isHit = Physics.Raycast(new Ray(camera.transform.position, camera.transform.forward), out hit);
+        bool isHit = Physics.Raycast(new Ray(camera.transform.position, camera.transform.forward), out hit, 3f);
+
+        Debug.DrawRay(camera.transform.position, camera.transform.forward);
 
         if (Input.GetButtonDown("Fire1"))
         {
@@ -42,12 +48,9 @@ public class Player : MonoBehaviour {
                         {
                             AudioSource.PlayClipAtPoint(hitAudioClips[Random.Range(0, hitAudioClips.Length)], transform.position);
 
-                            hit.collider.GetComponent<GuestAI>().LaunchGuest();
+                            hit.collider.GetComponent<GuestAI>().LaunchGuest(transform.forward * 2 + Vector3.up * 3 + (Vector3)Random.insideUnitCircle);
                         }
-                        if (hit.collider.GetComponent<Rigidbody>())
-                        {
-                            hit.collider.GetComponent<Rigidbody>().AddForce(Vector3.up * 10 + Random.insideUnitSphere * 4, ForceMode.Impulse);
-                        }
+
                         break;
 
                     case "Dirt":
@@ -61,12 +64,7 @@ public class Player : MonoBehaviour {
                     default:
                         break;
                 }
-
-
-
-
             }
-
         }
 
         if (isHit)
@@ -80,9 +78,11 @@ public class Player : MonoBehaviour {
                     {
                         if (equippedItem)
                         {
-                            equippedItem
+                            equippedItem.GetComponent<IEquippable>().UnEquip(hit.point);
                         }
                         hit.collider.GetComponent<IEquippable>().Equip(hand);
+
+                        equippedItem = hit.collider.gameObject;
                     }
                     break;
 
