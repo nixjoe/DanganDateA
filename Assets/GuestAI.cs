@@ -46,6 +46,8 @@ public class GuestAI : MonoBehaviour {
     {
         if (!inAir)
         {
+            audio.PlayOneShot(collideClips[Random.Range(0, collideClips.Length)]);
+
             CancelInvoke();
 
             inAir = true;
@@ -85,18 +87,21 @@ public class GuestAI : MonoBehaviour {
 
     private void OnCollisionEnter(Collision collision)
     {
-        switch (collision.transform.tag)
+        if (!inAir)
         {
-            case "Player":
+            switch (collision.transform.tag)
+            {
+                case "Player":
 
-                audio.PlayOneShot(collideClips[Random.Range(0, collideClips.Length)]);
+                    audio.PlayOneShot(collideClips[Random.Range(0, collideClips.Length)]);
 
-                StartCoroutine(PuntPlayer(collision.gameObject));
+                    StartCoroutine(PuntPlayer(collision.gameObject));
 
-                break;
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -105,10 +110,13 @@ public class GuestAI : MonoBehaviour {
         Vector3 dir = (transform.position - player.transform.position).normalized;
         dir = Vector3.ProjectOnPlane(dir, Vector3.up);
 
+        player.GetComponent<Player>().DealDamage(10);
+
         float time = 0;
+
         while (time < 0.1f)
         {
-            player.transform.Translate(dir * Time.deltaTime * 2);
+            player.transform.Translate(dir * Time.deltaTime * 10);
             time += Time.deltaTime;
             yield return new WaitForEndOfFrame();
         }
