@@ -43,8 +43,6 @@ public class Player : MonoBehaviour {
         RaycastHit hit;
         bool isHit = Physics.Raycast(new Ray(camera.transform.position, camera.transform.forward), out hit, 3f);
 
-
-
         if (Input.GetButtonDown("Fire1"))
         {
             Collider[] hits = { hit.collider };
@@ -79,9 +77,9 @@ public class Player : MonoBehaviour {
                     switch (tag)
                     {
                         case "Guest":
-                            if (currentCol.GetComponent<GuestAI>())
+                            if (currentCol.CompareTag("Guest"))
                             {
-                                AudioSource.PlayClipAtPoint(hitAudioClips[Random.Range(0, hitAudioClips.Length)], transform.position);
+                                AudioSource.PlayClipAtPoint(hitAudioClips[Random.Range(0, hitAudioClips.Length)], transform.position, 0.5f);
 
                                 currentCol.GetComponent<GuestAI>().LaunchGuest(transform.forward * 2 + Vector3.up * 3 + (Vector3)Random.insideUnitCircle);
                             }
@@ -93,6 +91,17 @@ public class Player : MonoBehaviour {
                                 AudioSource.PlayClipAtPoint(hitAudioClips[Random.Range(0, hitAudioClips.Length)], transform.position);
 
                                 currentCol.GetComponent<Dirt>().GetCleaned(25);
+                            }
+                            break;
+                        case "Equipable":
+                            if (hit.collider.GetComponent<Rigidbody>())
+                            {
+                                hit.collider.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Impulse);
+                                AudioSource.PlayClipAtPoint(hitAudioClips[Random.Range(0, hitAudioClips.Length)], transform.position, 0.5f);
+                            }
+                            if (hit.collider.GetComponent<GuestAI>())
+                            {
+                                hit.collider.GetComponent<GuestAI>().LaunchGuest(Vector3.zero);
                             }
                             break;
                         default:
@@ -120,7 +129,9 @@ public class Player : MonoBehaviour {
 
             equippedItem.GetComponent<IEquippable>().UnEquip(camera.transform.position + camera.transform.forward);
             equippedItem.GetComponent<Rigidbody>().AddForce(camera.transform.forward * throwForce * throwForceMultiplier, ForceMode.Impulse);
-            AudioSource.PlayClipAtPoint(Resources.Load<AudioClip>("swing"), transform.position);
+            AudioSource.PlayClipAtPoint(Resources.Load<AudioClip>("throw"), transform.position);
+
+            equippedItem = null;
         }
 
         if (isHit)

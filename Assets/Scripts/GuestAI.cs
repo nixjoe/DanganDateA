@@ -9,7 +9,7 @@ public class GuestAI : MonoBehaviour {
     private Rigidbody rb;
     public float minDelay, maxDelay;
 
-    new AudioSource audio;
+    protected new AudioSource audio;
 
     public float radius;
     public float collideForce = 4;
@@ -17,7 +17,9 @@ public class GuestAI : MonoBehaviour {
 
     public AudioClip[] collideClips;
 
-	void Start () {
+	public virtual void Start () {
+
+        print("STARTED");
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
         audio = GetComponent<AudioSource>();
@@ -42,12 +44,12 @@ public class GuestAI : MonoBehaviour {
         Gizmos.DrawSphere(transform.position, radius);
     }
 
-    public void LaunchGuest(Vector3 force)
+    public virtual void LaunchGuest(Vector3 force)
     {
+        audio.PlayOneShot(collideClips[Random.Range(0, collideClips.Length)]);
+
         if (!inAir)
         {
-            audio.PlayOneShot(collideClips[Random.Range(0, collideClips.Length)]);
-
             CancelInvoke();
 
             inAir = true;
@@ -78,6 +80,11 @@ public class GuestAI : MonoBehaviour {
             yield return new WaitForEndOfFrame();
         }
 
+        RestoreGuest();
+    }
+
+    protected virtual void RestoreGuest()
+    {
         rb.isKinematic = true;
         inAir = false;
         agent.enabled = true;

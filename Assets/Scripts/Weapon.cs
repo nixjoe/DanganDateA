@@ -19,6 +19,11 @@ public class Weapon : MonoBehaviour, IEquippable {
         transform.SetParent(parent, true);
         transform.gameObject.layer = parent.gameObject.layer;
 
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            transform.GetChild(i).gameObject.layer = parent.gameObject.layer; 
+        }
+
         GetComponent<Collider>().enabled = false;
         Destroy(GetComponent<Rigidbody>());
 
@@ -36,8 +41,13 @@ public class Weapon : MonoBehaviour, IEquippable {
 
         transform.parent = null;
         transform.position = pos + Vector3.up;
-
         transform.gameObject.layer = LayerMask.NameToLayer("Default");
+
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            transform.GetChild(i).gameObject.layer = LayerMask.NameToLayer("Default");
+        }
+
 
         GetComponent<Collider>().enabled = true;
 

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MenuHandler : MonoBehaviour {
 
-    public TMPro.TextMeshProUGUI tooltip, health;
+    public TMPro.TextMeshProUGUI tooltip, health, location, money;
     private float tooltipTime;
 
     public Animator menuAnimator, difficultyAnimator, popupAnimator;
@@ -96,6 +96,11 @@ public class MenuHandler : MonoBehaviour {
         }
 
         menuOpen = !menuOpen;
+    }
+
+    public void ShowPopup(float time, string content)
+    {
+        StartCoroutine(DisplayPopup(time, content));
     }
 
     public void SetHealth(int amount)
